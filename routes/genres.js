@@ -3,26 +3,26 @@ const router = express.Router();
 const Joi = require('@hapi/joi');
 
 const genres = [
-  { id: 0, genre: 'Ação' },
-  { id: 1, genre: 'Comédia' },
-  { id: 2, genre: 'Terror' },
+  { id: 0, genre: 'Action' },
+  { id: 1, genre: 'Comedy' },
+  { id: 2, genre: 'Horror' },
 ]
 
 router.get('/', (req, res) => {
   res.send('<h1>Hello World</h1>')
 })
 
-router.get('/api/genres', (req, res) => {
+router.get('/', (req, res) => {
   res.send(genres);
 });
 
-router.get('/api/genres/:id', (req, res) => {
+router.get('/:id', (req, res) => {
   const gender = genres.find(genre => parseInt(req.params.id) === genre.id);
   if (!gender) return res.status(404).send('The gender with the given ID was not found.');
   res.send(gender);
 });
 
-router.post('/api/genres', (req, res) => {
+router.post('/', (req, res) => {
   const { error } = validation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -35,7 +35,7 @@ router.post('/api/genres', (req, res) => {
   res.send(genres);
 });
 
-router.put('/api/genres/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   const genrer = genres.find(gender => gender.id === parseInt(req.params.id));
   if (!genrer) return res.status(404).send('The genrer with the given ID was not found');
 
@@ -46,7 +46,7 @@ router.put('/api/genres/:id', (req, res) => {
   res.send(genres);
 })
 
-router.delete('/api/genres/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   const gender = genres.find(gender => gender.id === parseInt(req.params.id));
   if (!gender) res.status(404).send('The genre with the given ID was not found.');
 
