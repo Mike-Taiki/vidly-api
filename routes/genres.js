@@ -1,59 +1,59 @@
+const Joi = require('@hapi/joi');
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
-const Joi = require('@hapi/joi');
 
-const genres = [
-  { id: 0, genre: 'Action' },
-  { id: 1, genre: 'Comedy' },
-  { id: 2, genre: 'Horror' },
-]
+mongoose.connect('mongodb://localhost/vidly-api', {useNewUrlParser: true, useUnifiedTopology: true});
 
-router.get('/', (req, res) => {
-  res.send('<h1>Hello World</h1>')
-})
+const Genre = new mongoose.model('Genre', new mongoose.Schema({
+  genre: {
+    type: String,
+    required: true,
+    minlength: 3,
+    maxlength: 10,
+  }
+}));
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+  const genres = await Genre.find();
   res.send(genres);
 });
 
-router.get('/:id', (req, res) => {
-  const gender = genres.find(genre => parseInt(req.params.id) === genre.id);
+router.get('/:id', async (req, res) => {
+  const gender = await Genre.find({ _id: req.params.id});
   if (!gender) return res.status(404).send('The gender with the given ID was not found.');
   res.send(gender);
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { error } = validation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const gender = { 
-      id: genres.length + 1, 
-      genre: req.body.genre,
-  }
+  let genre = new Genre({
+    genre: req.body.genre
+  });
 
-  genres.push(gender);
-  res.send(genres);
+  const result = await genre.save();
+  res.send(result);
 });
 
-router.put('/:id', (req, res) => {
-  const genrer = genres.find(gender => gender.id === parseInt(req.params.id));
+router.put('/:id', async (req, res) => {
+  const genrer = await Genre.updateOne({ _id: req.params.id }, {
+    $set: { genre: req.body.genre }
+  });
   if (!genrer) return res.status(404).send('The genrer with the given ID was not found');
-
+  
   const { error } = validation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-
-  genrer.genre = req.body.genre;
-  res.send(genres);
+  
+  res.send(genrer);
 })
 
-router.delete('/:id', (req, res) => {
-  const gender = genres.find(gender => gender.id === parseInt(req.params.id));
+router.delete('/:id', async (req, res) => {
+  const gender = await Genre.findOneAndDelete(req.params.id);
   if (!gender) res.status(404).send('The genre with the given ID was not found.');
 
-  const index = genres.indexOf(gender);
-  genres.splice(index, 1);
-
-  res.send(genres);
+  res.send(gender);
 })
 
 function validation(genre) {
