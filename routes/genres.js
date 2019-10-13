@@ -1,18 +1,9 @@
-const Joi = require('@hapi/joi');
+const { Genre, validationGenre } = require('../models/genres');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 
 mongoose.connect('mongodb://localhost/vidly-api', {useNewUrlParser: true, useUnifiedTopology: true});
-
-const Genre = new mongoose.model('Genre', new mongoose.Schema({
-  genre: {
-    type: String,
-    required: true,
-    minlength: 3,
-    maxlength: 10,
-  }
-}));
 
 router.get('/', async (req, res) => {
   const genres = await Genre.find();
@@ -26,7 +17,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { error } = validation(req.body);
+  const { error } = validationGenre(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   let genre = new Genre({
@@ -43,7 +34,7 @@ router.put('/:id', async (req, res) => {
   });
   if (!genrer) return res.status(404).send('The genrer with the given ID was not found');
   
-  const { error } = validation(req.body);
+  const { error } = validationGenre(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   
   res.send(genrer);
@@ -55,13 +46,5 @@ router.delete('/:id', async (req, res) => {
 
   res.send(gender);
 })
-
-function validation(genre) {
-  const schema = Joi.object({
-      genre: Joi.string().min(4).required()
-  });
-
-  return schema.validate(genre);
-}
 
 module.exports = router;
