@@ -1,22 +1,27 @@
-const { Genre, validationGenre } = require('../models/genres');
-const mongoose = require('mongoose');
-const express = require('express');
+const auth = require("../middleware/auth");
+const { Genre, validationGenre } = require("../models/genres");
+const mongoose = require("mongoose");
+const express = require("express");
 const router = express.Router();
 
-mongoose.connect('mongodb://localhost/vidly-api', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect("mongodb://localhost/vidly-api", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
-router.get('/', async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const genres = await Genre.find();
   res.send(genres);
 });
 
-router.get('/:id', async (req, res) => {
-  const gender = await Genre.find({ _id: req.params.id});
-  if (!gender) return res.status(404).send('The gender with the given ID was not found.');
+router.get("/:id", auth, async (req, res) => {
+  const gender = await Genre.find({ _id: req.params.id });
+  if (!gender)
+    return res.status(404).send("The gender with the given ID was not found.");
   res.send(gender);
 });
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { error } = validationGenre(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -28,23 +33,28 @@ router.post('/', async (req, res) => {
   res.send(result);
 });
 
-router.put('/:id', async (req, res) => {
-  const genrer = await Genre.updateOne({ _id: req.params.id }, {
-    $set: { genre: req.body.genre }
-  });
-  if (!genrer) return res.status(404).send('The genrer with the given ID was not found');
-  
+router.put("/:id", auth, async (req, res) => {
+  const genrer = await Genre.updateOne(
+    { _id: req.params.id },
+    {
+      $set: { genre: req.body.genre }
+    }
+  );
+  if (!genrer)
+    return res.status(404).send("The genrer with the given ID was not found");
+
   const { error } = validationGenre(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  
-  res.send(genrer);
-})
 
-router.delete('/:id', async (req, res) => {
+  res.send(genrer);
+});
+
+router.delete("/:id", auth, async (req, res) => {
   const gender = await Genre.findOneAndDelete(req.params.id);
-  if (!gender) res.status(404).send('The genre with the given ID was not found.');
+  if (!gender)
+    res.status(404).send("The genre with the given ID was not found.");
 
   res.send(gender);
-})
+});
 
 module.exports = router;
