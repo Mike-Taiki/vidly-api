@@ -1,4 +1,3 @@
-const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const { Genre, validationGenre } = require("../models/genres");
@@ -6,18 +5,16 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
-mongoose.connect("mongodb://localhost/vidly-api", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+// mongoose.connect("mongodb://localhost/vidly-api", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true
+// });
 
-router.get(
-  "/",
-  asyncMiddleware(async (req, res) => {
-    const genres = await Genre.find();
-    res.send(genres);
-  })
-);
+router.get("/", async (req, res) => {
+  throw new Error("Could not get the genres.");
+  const genres = await Genre.find();
+  res.send(genres);
+});
 
 router.get("/:id", auth, async (req, res) => {
   const gender = await Genre.find({ _id: req.params.id });
@@ -26,21 +23,17 @@ router.get("/:id", auth, async (req, res) => {
   res.send(gender);
 });
 
-router.post(
-  "/",
-  auth,
-  asyncMiddleware(async (req, res) => {
-    const { error } = validationGenre(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+router.post("/", auth, async (req, res) => {
+  const { error } = validationGenre(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    let genre = new Genre({
-      genre: req.body.genre
-    });
+  let genre = new Genre({
+    genre: req.body.genre
+  });
 
-    const result = await genre.save();
-    res.send(result);
-  })
-);
+  const result = await genre.save();
+  res.send(result);
+});
 
 router.put("/:id", auth, async (req, res) => {
   const genrer = await Genre.updateOne(
