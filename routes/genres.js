@@ -5,11 +5,6 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
-// mongoose.connect("mongodb://localhost/vidly-api", {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-// });
-
 router.get("/", async (req, res) => {
   throw new Error("Could not get the genres.");
   const genres = await Genre.find();

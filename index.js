@@ -15,6 +15,11 @@ const login = require("./routes/login");
 const express = require("express");
 const app = express();
 
+process.on("uncaughtException", ex => {
+  console.log("We got an uncaught exception");
+  winston.error(ex.message, ex);
+});
+
 winston.add(new winston.transports.File({ filename: "logfile.log" }));
 winston.add(
   new winston.transports.MongoDB({
@@ -23,10 +28,17 @@ winston.add(
   })
 );
 
+throw new Error("Something failed during startup.");
+
 if (!config.get("jwtPrivateKey")) {
   console.error("FATAL ERROR: jwtPrivateKey is not defined.");
   process.exit(1);
 }
+
+mongoose.connect("mongodb://localhost/vidly-api", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

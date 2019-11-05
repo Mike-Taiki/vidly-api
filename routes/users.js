@@ -7,11 +7,6 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
-mongoose.connect("mongodb://localhost/vidly-api", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
 router.get("/", async (req, res) => {
   const users = await User.find();
   res.send(users);
