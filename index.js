@@ -1,3 +1,4 @@
+const error = require("./middleware/erorr");
 const config = require("config");
 const Joi = require("@hapi/joi");
 Joi.objectId = require("joi-objectid")(Joi);
@@ -25,6 +26,7 @@ app.use("/api/rentals", rentals);
 app.use("/api/users", users);
 app.use("/api/login", login);
 app.use("/api/auth", auth);
+app.use(error);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

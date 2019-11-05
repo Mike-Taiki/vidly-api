@@ -10,9 +10,13 @@ mongoose.connect("mongodb://localhost/vidly-api", {
   useUnifiedTopology: true
 });
 
-router.get("/", auth, async (req, res) => {
-  const genres = await Genre.find();
-  res.send(genres);
+router.get("/", async (req, res, next) => {
+  try {
+    const genres = await Genre.find();
+    res.send(genres);
+  } catch (ex) {
+    next(ex);
+  }
 });
 
 router.get("/:id", auth, async (req, res) => {
