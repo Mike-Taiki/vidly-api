@@ -6,12 +6,11 @@ const express = require("express");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  throw new Error("Could not get the genres.");
   const genres = await Genre.find();
   res.send(genres);
 });
 
-router.get("/:id", auth, async (req, res) => {
+router.get("/:id", async (req, res) => {
   const gender = await Genre.find({ _id: req.params.id });
   if (!gender)
     return res.status(404).send("The gender with the given ID was not found.");

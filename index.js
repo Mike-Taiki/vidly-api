@@ -1,8 +1,9 @@
 const winston = require("winston");
 const express = require("express");
+const config = require("config");
 const app = express();
 
-require("./startup/logging");
+require("./startup/logging")();
 require("./startup/routes")(app); // this returns a function, so we pass app as an argument
 require("./startup/db")();
 require("./startup/config")();
@@ -18,5 +19,8 @@ const logger = winston.createLogger({
 });
 
 const port = process.env.PORT || 3000;
-const { message } = logger.info(`Listening on port ${port}...`);
-app.listen(port, () => message);
+const db = config.get("db");
+const { message } = logger.info(`Connected to ${db}...`);
+const server = app.listen(port, () => message);
+
+module.exports = server;
