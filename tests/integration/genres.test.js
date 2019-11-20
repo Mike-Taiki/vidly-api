@@ -42,36 +42,61 @@ describe("/api/genres", () => {
   });
 
   describe("POST /", () => {
-    it("should return 401 if client is not logged in", async () => {
-      const res = await request(server)
+    // Define the happy path, and then in each test, we change
+    // One parameter that clearly aligns with the name of the
+    // test.
+    let token;
+    let name;
+
+    const exec = async () => {
+      return await request(server)
         .post("/api/genres")
-        .send({ name: "genre1" });
+        .set("x-auth-token", token)
+        .send({ genre: name });
+    };
+
+    beforeEach(() => {
+      token = new User().generateAuthToken();
+      name = "genre1";
+    });
+
+    it("should return 401 if client is not logged in", async () => {
+      token = "";
+
+      const res = await exec();
 
       expect(res.status).toBe(401);
     });
 
     it("should return 400 if genre is less than 5 characters", async () => {
-      const token = new User().generateAuthToken();
+      name = "1234";
 
-      const res = await request(server)
-        .post("/api/genres")
-        .set("x-auth-token", token)
-        .send({ name: "1234" });
+      const res = await exec();
 
       expect(res.status).toBe(400);
     });
 
     it("should return 400 if genre is more than 50 characters", async () => {
-      const token = new User().generateAuthToken();
+      name = new Array(52).join("a");
 
-      const name = new Array(52).join("a");
-
-      const res = await request(server)
-        .post("/api/genres")
-        .set("x-auth-token", token)
-        .send({ name: name });
+      const res = await exec();
 
       expect(res.status).toBe(400);
+    });
+
+    it("should save the genre if it is valid", async () => {
+      await exec();
+
+      const genre = await Genre.find({ genre: "genre1" });
+
+      expect(genre).not.toBeNull();
+    });
+
+    it("should save the genre if it is valid", async () => {
+      const res = await exec();
+
+      expect(res.body).toHaveProperty("_id");
+      expect(res.body).toHaveProperty("genre", "genre1");
     });
   });
 });
